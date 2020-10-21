@@ -18,10 +18,9 @@ resource "aws_instance" "my_server" {
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sg_server.id]
   subnet_id              = "subnet-0b0db19b4606f0177"
-  #key_name =
-  #count                = var.number_instances == "1" ? 1 : 0
-  iam_instance_profile = "${aws_iam_instance_profile.s3_role_profile.name}"
-  user_data            = data.template_file.user_data.rendered
+  depends_on             = [aws_s3_bucket.pr_bucket]
+  iam_instance_profile   = "${aws_iam_instance_profile.s3_role_profile.name}"
+  user_data              = data.template_file.user_data.rendered
   tags = {
     Name  = "My server by terraform"
     Owner = "Kate Morozova"
@@ -83,13 +82,11 @@ EOF
 
 
 resource "aws_iam_instance_profile" "s3_role_profile" {
-  #  count = var.conditional == "1" ? 1 : 0
   name = "s3_bucket_role"
   role = "${aws_iam_role.server_access_s3[0].name}"
 }
 
 resource "aws_iam_role_policy" "s3_bucket_policy" {
-  #count  = var.conditional == "1" ? 1 : 0
   name   = "s3_bucket_policy"
   role   = "${aws_iam_role.server_access_s3[0].id}"
   policy = <<EOF
@@ -105,6 +102,3 @@ resource "aws_iam_role_policy" "s3_bucket_policy" {
 }
 EOF
 }
-
-#===============================================================================
-#  count  = var.conditional ? 1 : 0
